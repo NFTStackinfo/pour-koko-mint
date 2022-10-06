@@ -5,11 +5,14 @@ import { fetchData } from '../redux/data/dataActions'
 import { connect } from '../redux/blockchain/blockchainActions'
 import addressList from '../data'
 import { fixImpreciseNumber, normalizeMinMax } from '../utils/math'
+import AppCountdown from './AppCountdown'
+import { truncate } from '../utils/text'
 
 const { MerkleTree } = require('merkletreejs')
 const keccak256 = require('keccak256')
+const PUBLIC_SALE_START = 1665153000000
 
-const MintButton = (onMint) => {
+const MintButton = ({ onMint }) => {
   const [walletConnected, setWalletConnected] = useState(false)
   const [fallback, setFallback] = useState('')
   const [mintCount, setMintCount] = useState(1)
@@ -216,10 +219,8 @@ const MintButton = (onMint) => {
     if (typeof window.ethereum === 'undefined') {
       if (connectingMobile && !walletConnected && (isIOS || isAndroid)
         || blockchain.errorMsg === metamaskError) {
-
         window.location.replace(
           'https://metamask.app.link/dapp/mint.bucketsclub.com/')
-
       }
     }
 
@@ -230,56 +231,104 @@ const MintButton = (onMint) => {
     setFallback('')
     claimNFTs(count)
   }
+
+  const [isPresale, setIsPresale] = useState(true)
+  const [isInWhitelisted, setIsInWhitelisted] = useState(true)
+  const [isMinted, setIsMinted] = useState(false)
+
+  useEffect(() => {
+    if (isMinted) {
+      onMint()
+    }
+  }, [isMinted])
   return (
     <div className="mint-button__container">
-      {walletConnected && !notSelected ? (
+      {walletConnected ? (
         <>
-          {/*<div className="mint-content">*/}
-          {/*  <div className="mint-input">*/}
-          {/*    <button*/}
-          {/*      onClick={() => {*/}
-          {/*        setMintCount(normalizeMinMax(mintCount - 1, minMintCount, maxMintCount))*/}
-          {/*      }}*/}
-          {/*      disabled={mintCount === minMintCount}*/}
-          {/*    >*/}
-          {/*      <img*/}
-          {/*        src="/assets/archive/minus.svg"*/}
-          {/*        alt="minus"*/}
-          {/*      />*/}
-          {/*    </button>*/}
+          <div className="mint-button__mint">
+            <div className="mint-button__mint__info">
+              <h4>{
+                isMinted ?
+                  (<>
+                    Your mint was successful! <br />
+                    Welcome to the pour koko fam
+                  </>)
+                  : isPresale
+                    // if not selected
+                    ? isInWhitelisted
+                      ? (<>
+                        Congratulations - WL found <br />
+                        Presale ends <AppCountdown date={PUBLIC_SALE_START} />
+                      </>)
+                      // if selected
+                      : (<>
+                        No WL found - public sale starts <br />
+                        <AppCountdown date={PUBLIC_SALE_START} />
+                      </>)
+                    : (<>
+                      Public sale is live!
+                    </>)
+              }</h4>
+            </div>
 
-          {/*    <p>{mintCount}</p>*/}
-          {/*    <button*/}
-          {/*      onClick={() => setMintCount(normalizeMinMax(mintCount + 1), minMintCount, maxMintCount)}*/}
-          {/*      disabled={mintCount + numberMintWallet >= maxMintCount ||*/}
-          {/*        mintCount + totalSupply >= maxTotalSupply}*/}
-          {/*    >*/}
-          {/*      <img src="/assets/archive/plus.svg" alt="minus" />*/}
-          {/*    </button>*/}
-          {/*  </div>*/}
+            <div className="mint-button__mint__wallet-address">
+              <h5>Wallet Address - {truncate(
+                blockchain.account,
+                0, 6,
+                blockchain.account.length - 5, blockchain.account.length - 1,
+                '....'
+              )}
+              </h5>
+            </div>
 
-          {/*  <button*/}
-          {/*    className="btn btn-mint"*/}
-          {/*    disabled={disableMint}*/}
-          {/*    onClick={e => handleMint(e, mintCount)}*/}
-          {/*  >*/}
-          {/*    Mint Now*/}
-          {/*    {loading &&*/}
-          {/*      <div className="lds-ring">*/}
-          {/*        <div />*/}
-          {/*        <div />*/}
-          {/*        <div />*/}
-          {/*        <div />*/}
-          {/*      </div>}*/}
-          {/*  </button>*/}
-          {/*</div>*/}
-          {/*{fallback && <p className="warn-text">{fallback}</p>}*/}
-          Mint
+            <div className="mint-button__mint__btn">
+              {((isPresale && isInWhitelisted) || !isPresale) && !isMinted
+                ? (<>
+                    <div className="mint-input">
+                      <button
+                        onClick={() => setMintCount(normalizeMinMax(mintCount - 1, minMintCount, maxMintCount))}
+                        disabled={mintCount === minMintCount}
+                        className="btn-minus"
+                      >
+                        -
+                      </button>
+
+                      <input
+                        value={mintCount}
+                        type="number"
+                        onChange={e => setMintCount(normalizeMinMax(+e.target.value, minMintCount, maxMintCount))}
+                      />
+
+                      <button
+                        onClick={() => setMintCount(normalizeMinMax(mintCount + 1), minMintCount, maxMintCount)}
+                        disabled={mintCount + numberMintWallet >= maxMintCount ||
+                          mintCount + totalSupply >= maxTotalSupply}
+                        className="btn-plus"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    <button
+                      className="btn"
+                      onClick={e => setIsMinted(true)}
+                    >Mint now
+                    </button>
+                  </>
+                )
+                : (
+                  <a className="btn" href="https://pourkoko.com/">
+                    Back to website
+                  </a>
+                )}
+            </div>
+          </div>
+          {fallback && <p className="warn-text">{fallback}</p>}
         </>
 
       ) : (
         <div className="mint-button__connect-wallet">
-          <h4>{true
+          <h4>{isPresale
             ? 'Connect wallet to mint'
             : <>
               Public sale is live!
