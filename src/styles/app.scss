@@ -1,0 +1,317 @@
+body {
+    font-family: 'Acumin', sans-serif;
+    font-weight: 300;
+    font-size: 28px;
+    color: #fff;
+}
+
+.App {
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow-x: hidden;
+    background-image: url("../assets/bg-image.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.container {
+    max-width: 952px;
+    width: 100%;
+    padding: 0 16px;
+    margin: 0 auto;
+}
+
+.content {
+    background-color: #000000;
+    padding: 12px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    >.logo {
+        display: block;
+        max-width: 184px;
+    }
+}
+
+
+.mint {
+    &-container {
+        width: 100%;
+        margin-top: 28px;
+    }
+
+    &-content {
+        width: 100%;
+        padding: 52px 64px;
+        background-color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        >h2 {
+            font-size: 127px;
+            font-weight: 900;
+            font-family: 'Acumin', sans-serif;
+            text-transform: uppercase;
+        }
+    }
+}
+
+.mint-button {
+    &__container {
+        width: 100%;
+    }
+
+    &__connect-wallet {
+        >h4 {
+            text-transform: uppercase;
+            font-weight: 300;
+            font-size: 29px;
+        }
+
+        >button {
+            margin-top: 74px;
+        }
+    }
+}
+
+.page-title {
+    font-weight: 900;
+    font-size: 48px;
+    letter-spacing: 0.08em;
+    font-style: italic;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+.page-description {
+    margin-bottom: 16px;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+    font-weight: 300;
+}
+
+.desc {
+    margin: 24px 0 48px;
+    display: flex;
+
+
+    &-item {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        flex: 1;
+        margin-right: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 16px 24px;
+        border-radius: 10px;
+
+        img {
+            margin-right: 16px;
+        }
+
+    }
+    &-text {
+        font-size: 14px;
+        margin-top: 4px;
+    }
+}
+.btn-wrapper {
+    position: relative;
+    text-align: center;
+    padding-bottom: 24px;
+}
+
+.mint-content {
+    display: inline-flex;
+    align-items: center;
+    color: #000;
+}
+
+.mint-input {
+    line-height: 44px;
+    //background-color: #fff;
+    color: #fff;
+    border: 1px solid #fff;
+    font-weight: 700;
+    width: 140px;
+    margin-right: 24px;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-around;
+
+    button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+
+        &[disabled] {
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        img {
+            display: block;
+        }
+    }
+}
+
+.btn {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 78px;
+    transition: .3s;
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 41px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+
+    &[disabled] {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+    &:hover {
+       background-color: rgba(0, 0, 0, 0.85);
+    }
+}
+
+.warn-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 4px 0;
+    font-size: 20px;
+}
+
+.lds-ring {
+    display: inline-block;
+    position: relative;
+    width: 20px;
+    height: 20px;
+    margin-left: 24px;
+}
+
+.lds-ring div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid black;
+    border-radius: 50%;
+    animation: ldsRing 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: black transparent transparent transparent;
+}
+
+.lds-ring div:nth-child(1) {
+    animation-delay: -0.45s;
+}
+
+.lds-ring div:nth-child(2) {
+    animation-delay: -0.3s;
+}
+
+.lds-ring div:nth-child(3) {
+    animation-delay: -0.15s;
+}
+
+@media (max-width: 991px) {
+
+    .page-title {
+        font-size: 32px;
+    }
+    .page-description {
+        font-size: 18px;
+        line-height: 26px;
+    }
+
+    .mint-input {
+        margin-right: 16px;
+    }
+    .btn {
+        padding: 0 24px;
+    }
+    .desc {
+        flex-direction: column;
+        margin: 12px 0 32px;
+
+        &-item {
+            margin-right: 0;
+
+
+            &:not(:last-child) {
+                margin-bottom: 16px;
+            }
+
+        }
+        &-text {
+            font-size: 14px;
+            margin-top: 4px;
+        }
+    }
+
+    .gallery {
+        height: 272px;
+
+        &:after {
+            height: 80%;
+        }
+
+        &-row {
+
+            li {
+                margin-right: 16px;
+                min-width: 188px;
+            }
+
+            &-1 {
+                margin-bottom: 16px;
+            }
+        }
+    }
+}
+
+
+@media (max-width: 575px) {
+
+    .gallery {
+        height: 217px;
+
+        &:after {
+            height: 80%;
+        }
+
+        &-row {
+
+            li {
+                margin-right: 12px;
+                min-width: 147px;
+            }
+
+            &-1 {
+                margin-bottom: 12px;
+            }
+        }
+    }
+
+}
+
+@keyframes ldsRing {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
