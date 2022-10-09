@@ -1,11 +1,15 @@
 @font-face {
-  font-family: 'Acumin';
-  src: url('./fonts/Acumin-Black.woff2') format('woff2');
-  font-weight: 900;
+  font-family: 'AcuminProWide';
+  src: url('./fonts/AcuminProWide-Bold.woff2') format('woff2'),
+  url('./fonts/AcuminProWide-Bold.woff') format('woff'),
+  url('./fonts/AcuminProWide-Bold.ttf') format('truetype');
+  font-weight: bold;
 }
 
 @font-face {
-  font-family: 'Acumin';
-  src: url('./fonts/Acumin-Light.woff') format('woff');
-  font-weight: 300;
+  font-family: 'AcuminProWide';
+  src: url('./fonts/AcuminProWide-Regular.woff2') format('woff2'),
+  url('./fonts/AcuminProWide-Regular.woff') format('woff'),
+  url('./fonts/AcuminProWide-Regular.ttf') format('truetype');
+  font-weight: normal;
 }

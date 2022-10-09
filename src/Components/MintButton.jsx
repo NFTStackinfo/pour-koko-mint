@@ -7,10 +7,11 @@ import addressList from '../data'
 import { fixImpreciseNumber, normalizeMinMax } from '../utils/math'
 import AppCountdown from './AppCountdown'
 import { truncate } from '../utils/text'
+import Button from './Button'
 
 const { MerkleTree } = require('merkletreejs')
 const keccak256 = require('keccak256')
-const PUBLIC_SALE_START = 1665153000000
+const PUBLIC_SALE_START = 1665399600000
 
 const MintButton = ({ onMint }) => {
   const [walletConnected, setWalletConnected] = useState(false)
@@ -23,7 +24,7 @@ const MintButton = ({ onMint }) => {
   const [maxTotalSupply, setMaxTotalSupply] = useState(null)
   const [totalSupply, setTotalSupply] = useState(null)
   const [publicMintActive, setPublicMintActive] = useState(false)
-  const [maxMintCount, setMaxMintCount] = useState(null)
+  const [maxMintCount, setMaxMintCount] = useState(10)
   const [notSelected, setNotSelected] = useState(true)
   const [loading, setLoading] = useState(false)
 
@@ -293,11 +294,9 @@ const MintButton = ({ onMint }) => {
                         -
                       </button>
 
-                      <input
-                        value={mintCount}
-                        type="number"
-                        onChange={e => setMintCount(normalizeMinMax(+e.target.value, minMintCount, maxMintCount))}
-                      />
+                      <span
+                        className="mint-input__count"
+                      >{mintCount}</span>
 
                       <button
                         onClick={() => setMintCount(normalizeMinMax(mintCount + 1), minMintCount, maxMintCount)}
@@ -309,16 +308,15 @@ const MintButton = ({ onMint }) => {
                       </button>
                     </div>
 
-                    <button
-                      className="btn"
-                      onClick={e => setIsMinted(true)}
+                    <Button
+                      onClick={() => setIsMinted(true)}
                     >Mint now
-                    </button>
+                    </Button>
                   </>
                 )
                 : (
                   <a className="btn" href="https://pourkoko.com/">
-                    Back to website
+                    <span>Back to website</span>
                   </a>
                 )}
             </div>
@@ -337,9 +335,8 @@ const MintButton = ({ onMint }) => {
             </>}
           </h4>
 
-          <button
-            className="btn"
-            id={'connectBtn'}
+          <Button
+            id="connectBtn"
             onClick={e => {
               e.preventDefault()
               dispatch(connect())
@@ -347,7 +344,7 @@ const MintButton = ({ onMint }) => {
             }}
           >
             Connect wallet
-          </button>
+          </Button>
           {fallback && <p className="warn-text">{fallback}</p>}
         </div>
       )}
