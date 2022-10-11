@@ -11,7 +11,7 @@ import Button from './Button'
 
 const { MerkleTree } = require('merkletreejs')
 const keccak256 = require('keccak256')
-const PUBLIC_SALE_START = 1665399600000
+const PUBLIC_SALE_START = 1665473295000
 
 const MintButton = ({ onMint }) => {
   const [walletConnected, setWalletConnected] = useState(false)
@@ -259,12 +259,12 @@ const MintButton = ({ onMint }) => {
                     ? isInWhitelisted
                       ? (<>
                         Congratulations - WL found <br />
-                        Presale ends <AppCountdown date={PUBLIC_SALE_START} />
+                        Presale ends <AppCountdown date={PUBLIC_SALE_START} onComplete={() => setIsPresale(false)} />
                       </>)
                       // if selected
                       : (<>
                         No WL found - public sale starts <br />
-                        <AppCountdown date={PUBLIC_SALE_START} />
+                        <AppCountdown date={PUBLIC_SALE_START} onComplete={() => setIsPresale(false)} />
                       </>)
                     : (<>
                       Public sale is live!
