@@ -1,11 +1,11 @@
 import Countdown from 'react-countdown'
 
-import React, { useEffect } from 'react'
+import React  from 'react'
 
 const Renderer = ({ days, hours, minutes, seconds, completed }) => {
   if (completed) {
     // Render a completed state
-    return <span className="countdown-text">Time is up!</span>
+    return <span className="countdown-text completed">Time is up!</span>
   } else {
     // Render a countdown
     return <span className="countdown-text">

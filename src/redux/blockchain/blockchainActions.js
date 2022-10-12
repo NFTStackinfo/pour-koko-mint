@@ -1,6 +1,6 @@
 // constants
 import Web3 from "web3"
-import SmartContract from "../../contracts/BucketsClubFrontNine.json"
+import SmartContract from "../../contracts/PourKokoNFT.json"
 // log
 import { fetchData } from "../data/dataActions"
 
@@ -47,11 +47,13 @@ export const connect = () => {
         })
         // console.log(networkId)
         //const NetworkData = await SmartContract.networks[networkId];
-        if (networkId === "1" || networkId === 1) {
+        console.log('networkId : ', networkId)
+        if (networkId === "11155111" || networkId === 11155111) {
           const SmartContractObj = new web3.eth.Contract(
             SmartContract.abi,
-            "0x470c27a0Ed83f44B09aCAE49e6cefFd1C7FaA6F0"
+            "0x694828C31a6715c46d3745AbAbAB1bC4d3aA61c2"
           )
+
           dispatch(
             connectSuccess({
               account: accounts[0],

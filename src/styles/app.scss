@@ -152,8 +152,16 @@ main {
   font-weight: bold;
   width: 80px;
 
+  &.completed {
+    width: 120px;
+  }
+
   @media (max-width: 592px) {
     width: 14vw;
+
+    &.completed {
+      width: 21vw;
+    }
   }
 }
 
@@ -267,14 +275,12 @@ main {
 }
 
 .warn-text {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 4px 0;
+  margin-top: 8px;
   font-size: 13px;
 
   @media (max-width: 592px) {
     font-size: 2.3vw;
+    margin-top: 1.35vw;
   }
 }
 

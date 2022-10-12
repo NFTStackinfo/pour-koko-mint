@@ -9,35 +9,32 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "./ERC721A.sol";
 
-contract BucketsClubFrontNine is ERC721A, Ownable {
+contract PourKokoNFT is ERC721A, Ownable {
   using MerkleProof for bytes32[];
 
   bytes32 public root;
 
-  uint256 public mintPrice = 0.4 ether;
-  uint256 public preSaleMintPrice =  0.1 ether;
-  uint256 public raffleMintPrice = 0.1 ether;
+  uint256 public mintPrice = 0.065 ether;
+  uint256 public preSaleMintPrice = 0.061 ether;
 
-  uint256 private reserveAtATime = 50;
+  uint256 private reserveAtATime = 165;
   uint256 private reservedCount = 0;
-  uint256 private maxReserveCount = 300;
+  uint256 private maxReserveCount = 495;
 
   string _baseTokenURI;
 
-  bool public isRaffleActive = false;
   bool public isMintActive = false;
   bool public isPreSaleMintActive = false;
   bool public isClosedMintForever = false;
   bool public isSellOpen = false;
 
-  uint256 public maximumMintSupply = 9000;
-  uint256 public maximumAllowedTokensPerPurchase = 10;
-  uint256 public maximumAllowedTokensPerWallet = 10;
-  uint256 public allowListMaxMint = 10;
+  uint256 public maximumMintSupply = 4995;
+  uint256 public maximumAllowedTokensPerWallet = 5;
+  uint256 public allowListMaxMint = 5;
   uint256 public immutable maxPerAddressDuringMint;
 
-  address private OtherAddress1 = 0x053490B1e960AeeB1aCB2bf10d53BE7d264f35Af;
-  address private OtherAddress2 = 0xAFc1229EA5fBBD814CECb0A4d402FA6450762467;
+  address private OtherAddress1 = 0x9f54b3f09D7D9e83C2d4DCd8c85736e97474EDEb;
+  address private OtherAddress2 = 0x0d00ab8041B966F120410E82DF789Ad6595A1f7d;
 
   mapping(address => bool) private _allowList;
   mapping(address => uint256) private _allowListClaimed;
@@ -50,7 +47,7 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
     string memory baseURI,
     uint256 maxBatchSize_,
     uint256 collectionSize_
-  ) ERC721A("Buckets Club Front Nine", "Buckets Club Front Nine", maxBatchSize_, collectionSize_) {
+  ) ERC721A("POUR KOKO NFT", "POUR KOKO NFT", maxBatchSize_, collectionSize_) {
     setBaseURI(baseURI);
     maxPerAddressDuringMint = maxBatchSize_;
   }
@@ -70,10 +67,6 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
     _;
   }
 
-  function setMaximumAllowedTokens(uint256 _count) public onlyAuthorized {
-    maximumAllowedTokensPerPurchase = _count;
-  }
-
   function setMaximumAllowedTokensPerWallet(uint256 _count) public onlyAuthorized {
     maximumAllowedTokensPerWallet = _count;
   }
@@ -85,10 +78,6 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
 
   function setMaxMintSupply(uint256 maxMintSupply) external  onlyAuthorized {
     maximumMintSupply = maxMintSupply;
-  }
-
-  function setRaffleActive(bool _isRaffleActive) public onlyAuthorized {
-    isRaffleActive = _isRaffleActive;
   }
 
   function setIsPreSaleMintActive(bool _isPreSaleMintActive) external onlyAuthorized {
@@ -148,16 +137,8 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
     preSaleMintPrice = _price;
   }
 
-  function setRaffleMintPrice(uint256 _price) public onlyAuthorized {
-    raffleMintPrice = _price;
-  }
-
   function setBaseURI(string memory baseURI) public onlyAuthorized {
     _baseTokenURI = baseURI;
-  }
-
-  function getMaximumAllowedTokens() public view onlyAuthorized returns (uint256) {
-    return maximumAllowedTokensPerPurchase;
   }
 
   function getMintPrice() external view returns (uint256) {
@@ -166,10 +147,6 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
 
   function getPreSaleMintPrice() external view returns (uint256) {
     return preSaleMintPrice;
-  }
-
-  function getRaffleMintPrice() external view returns (uint256) {
-    return raffleMintPrice;
   }
 
   function getIsClosedMintForever() external view returns (bool) {
@@ -233,10 +210,6 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
     require(totalSupply() + _count <= maximumMintSupply, "Total supply exceeded.");
     require(totalSupply() <= maximumMintSupply, "Total supply spent.");
     require(
-      _count <= maximumAllowedTokensPerPurchase,
-      "Exceeds maximum allowed tokens"
-    );
-    require(
       numberMinted(msg.sender) + _count <= maxPerAddressDuringMint,
       "can not mint this many"
     );
@@ -247,29 +220,16 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
     _safeMint(_to, _count);
   }
 
-  function raffleMint(uint256 _count, bytes32[] memory _proof) public payable saleIsOpen {
+  function preSaleMint(uint256 _count, bytes32[] memory _proof) public payable saleIsOpen {
     bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
 
-    require(isRaffleActive, "Raffle is not active");
+    require(isPreSaleMintActive, "PreSale is not active");
     require(_proof.verify(root, leaf), "invalid proof");
     require(totalSupply() < maximumMintSupply, "All tokens have been minted");
     require(_count <= allowListMaxMint, "Cannot purchase this many tokens");
     require(_allowListClaimed[msg.sender] + _count <= allowListMaxMint, "Purchase exceeds max allowed");
-    require(msg.value >= raffleMintPrice * _count, "Insuffient ETH amount sent.");
+    require(msg.value >= preSaleMintPrice * _count, "Insuffient ETH amount sent.");
     require(!isClosedMintForever, "Mint Closed Forever");
-    _allowListClaimed[msg.sender] += _count;
-
-    _safeMint(msg.sender, _count);
-  }
-
-  function preSaleMint(uint256 _count) public payable saleIsOpen {
-    require(isPreSaleMintActive, 'Pre Sale Mint is not active');
-    require(_allowList[msg.sender], 'You are not on the Allow List');
-    require(totalSupply() < maximumMintSupply, 'All tokens have been minted');
-    require(_count <= allowListMaxMint, 'Cannot purchase this many tokens');
-    require(_allowListClaimed[msg.sender] + _count <= allowListMaxMint, 'Purchase exceeds max allowed');
-    require(msg.value >= preSaleMintPrice * _count, 'Insuffient ETH amount sent.');
-    require(!isClosedMintForever, 'Mint Closed Forever');
     _allowListClaimed[msg.sender] += _count;
 
     _safeMint(msg.sender, _count);
@@ -291,8 +251,8 @@ contract BucketsClubFrontNine is ERC721A, Ownable {
 
   function withdraw() external onlyAuthorized {
     uint balance = address(this).balance;
-    payable(OtherAddress1).transfer(balance * 9000 / 10000);
-    payable(OtherAddress2).transfer(balance * 1000 / 10000);
+    payable(OtherAddress1).transfer(balance * 5000 / 10000);
+    payable(OtherAddress2).transfer(balance * 5000 / 10000);
     payable(owner()).transfer(balance * 0 / 10000);
   }
 }

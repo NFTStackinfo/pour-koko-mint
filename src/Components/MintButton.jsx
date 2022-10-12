@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { isAndroid, isIOS } from 'react-device-detect'
 import { fetchData } from '../redux/data/dataActions'
 import { connect } from '../redux/blockchain/blockchainActions'
-import addressList from '../data'
+import addressList from '../addressList'
 import { fixImpreciseNumber, normalizeMinMax } from '../utils/math'
 import AppCountdown from './AppCountdown'
 import { truncate } from '../utils/text'
@@ -14,6 +14,7 @@ const keccak256 = require('keccak256')
 const PUBLIC_SALE_START = 1665473295000
 
 const MintButton = ({ onMint }) => {
+  const [isMinted, setIsMinted] = useState(false)
   const [walletConnected, setWalletConnected] = useState(false)
   const [fallback, setFallback] = useState('')
   const [mintCount, setMintCount] = useState(1)
@@ -23,7 +24,7 @@ const MintButton = ({ onMint }) => {
   const [numberMintWallet, setNumberMintWallet] = useState(null)
   const [maxTotalSupply, setMaxTotalSupply] = useState(null)
   const [totalSupply, setTotalSupply] = useState(null)
-  const [publicMintActive, setPublicMintActive] = useState(false)
+  const [publicMintActive, setPublicMintActive] = useState(true)
   const [maxMintCount, setMaxMintCount] = useState(10)
   const [notSelected, setNotSelected] = useState(true)
   const [loading, setLoading] = useState(false)
@@ -37,6 +38,7 @@ const MintButton = ({ onMint }) => {
   ]
   const metamaskError = 'Install Metamask.'
 
+  // claim NFTs
   const claimNFTs = async (_amount) => {
     setLoading(true)
     let tree
@@ -54,11 +56,11 @@ const MintButton = ({ onMint }) => {
     createMerkleTree()
 
     const isMintActive = await blockchain.smartContract.methods.isMintActive().call()
-    const isRaffleActive = await blockchain.smartContract.methods.isRaffleActive().call()
+    const isPreSaleMintActive = await blockchain.smartContract.methods.isPreSaleMintActive().call()
     const mint = isMintActive
       ? await blockchain.smartContract.methods.mint(blockchain.account, _amount) :
-      isRaffleActive
-        ? await blockchain.smartContract.methods.raffleMint(_amount, getProof(blockchain.account))
+      isPreSaleMintActive
+        ? await blockchain.smartContract.methods.preSaleMint(_amount, getProof(blockchain.account))
         : null
 
     if (mint && !disableMint) {
@@ -95,8 +97,7 @@ const MintButton = ({ onMint }) => {
           setFallback('Sorry, something went wrong please try again')
         }
       }).then(receipt => {
-        setFallback('Thanks! You have successfully minted.')
-        onMint()
+        setIsMinted(true)
       })
     } else {
       setLoading(false)
@@ -109,17 +110,15 @@ const MintButton = ({ onMint }) => {
 
       dispatch(fetchData(blockchain.account))
       if (blockchain.account) {
-
-
         setWalletConnected(true)
         const isMintActive = await blockchain.smartContract.methods.isMintActive().call()
-        const isRaffleActive = await blockchain.smartContract.methods.isRaffleActive().call()
+        const isPreSaleMintActive = await blockchain.smartContract.methods.isPreSaleMintActive().call()
 
         const price = isMintActive
           ?
           await blockchain.smartContract.methods.mintPrice().call() / 10 ** 18
           :
-          await blockchain.smartContract.methods.raffleMintPrice().call() /
+          await blockchain.smartContract.methods.preSaleMintPrice().call() /
           10 ** 18
         setMintPrice(price)
 
@@ -135,16 +134,14 @@ const MintButton = ({ onMint }) => {
           const publicMintedWallet = await blockchain?.smartContract?.methods.publicMintClaimed(
             blockchain.account).call()
           setNumberMintWallet(+publicMintedWallet)
-        }
+        } else if (isPreSaleMintActive) {
+          const preSaleMaxMint = await blockchain.smartContract.methods.allowListMaxMint().call()
+          setMaxMintCount(+preSaleMaxMint)
 
-        if (isRaffleActive) {
-          const raffleMaxMint = await blockchain.smartContract.methods.allowListMaxMint().call()
-          setMaxMintCount(+raffleMaxMint)
-
-          const raffleMintedWallet = await blockchain?.smartContract?.methods.allowListClaimedBy(
+          const preSaleMintedWallet = await blockchain?.smartContract?.methods.allowListClaimedBy(
             blockchain.account).call()
-          setNumberMintWallet(+raffleMintedWallet)
-          if (raffleMaxMint === raffleMintedWallet) {
+          setNumberMintWallet(+preSaleMintedWallet)
+          if (preSaleMaxMint === preSaleMintedWallet) {
             setDisableMint(true)
           }
 
@@ -179,7 +176,7 @@ const MintButton = ({ onMint }) => {
         }
 
 
-        if (!isMintActive && !isRaffleActive) {
+        if (!isMintActive && !isPreSaleMintActive) {
           return setFallback('The minting is closed')
         }
         if (totalSupply > maxTotalSupply) {
@@ -203,6 +200,8 @@ const MintButton = ({ onMint }) => {
     publicMintActive
   ])
 
+  // TODO: change dapp link
+  // blockchain error handling
   useEffect(() => {
     setConnectingMobile(true)
 
@@ -212,30 +211,27 @@ const MintButton = ({ onMint }) => {
     }
     if (blockchain.errorMsg === metamaskError && !(isIOS || isAndroid)) {
       window.location.replace(
-        'https://metamask.app.link/dapp/mint.bucketsclub.com/')
+        'https://metamask.app.link/dapp/mellow-mooncake-43c228.netlify.app/')
     }
   }, [blockchain.errorMsg])
 
+  // open mobile metamask
   const openMobileMetamask = () => {
     if (typeof window.ethereum === 'undefined') {
       if (connectingMobile && !walletConnected && (isIOS || isAndroid)
         || blockchain.errorMsg === metamaskError) {
         window.location.replace(
-          'https://metamask.app.link/dapp/mint.bucketsclub.com/')
+          'https://metamask.app.link/dapp/mellow-mooncake-43c228.netlify.app/')
       }
     }
 
   }
 
-  const handleMint = (e, count) => {
+  const handleMint = (e) => {
     e.preventDefault()
     setFallback('')
-    claimNFTs(count)
+    claimNFTs(mintCount)
   }
-
-  const [isPresale, setIsPresale] = useState(true)
-  const [isInWhitelisted, setIsInWhitelisted] = useState(true)
-  const [isMinted, setIsMinted] = useState(false)
 
   useEffect(() => {
     if (isMinted) {
@@ -249,26 +245,25 @@ const MintButton = ({ onMint }) => {
           <div className="mint-button__mint">
             <div className="mint-button__mint__info">
               <h4>{
-                isMinted ?
-                  (<>
+                isMinted
+                  ? (<>
                     Your mint was successful! <br />
                     Welcome to the pour koko fam
                   </>)
-                  : isPresale
-                    // if not selected
-                    ? isInWhitelisted
+                  : publicMintActive
+                    ? (<>
+                      Public sale is live!
+                    </>)
+                    : notSelected
                       ? (<>
                         Congratulations - WL found <br />
-                        Presale ends <AppCountdown date={PUBLIC_SALE_START} onComplete={() => setIsPresale(false)} />
+                        Presale ends <AppCountdown date={PUBLIC_SALE_START} />
                       </>)
                       // if selected
                       : (<>
                         No WL found - public sale starts <br />
-                        <AppCountdown date={PUBLIC_SALE_START} onComplete={() => setIsPresale(false)} />
+                        <AppCountdown date={PUBLIC_SALE_START} />
                       </>)
-                    : (<>
-                      Public sale is live!
-                    </>)
               }</h4>
             </div>
 
@@ -276,49 +271,49 @@ const MintButton = ({ onMint }) => {
               <h5>Wallet Address - {truncate(
                 blockchain.account,
                 0, 6,
-                blockchain.account.length - 5, blockchain.account.length - 1,
+                blockchain.account?.length - 5, blockchain.account?.length - 1,
                 '....'
               )}
               </h5>
             </div>
 
             <div className="mint-button__mint__btn">
-              {((isPresale && isInWhitelisted) || !isPresale) && !isMinted
-                ? (<>
-                    <div className="mint-input">
-                      <button
-                        onClick={() => setMintCount(normalizeMinMax(mintCount - 1, minMintCount, maxMintCount))}
-                        disabled={mintCount === minMintCount}
-                        className="btn-minus"
-                      >
-                        -
-                      </button>
+              {((!publicMintActive && !notSelected) || publicMintActive) && !isMinted &&
+                (<>
+                  <div className="mint-input">
+                    <button
+                      onClick={() => setMintCount(normalizeMinMax(mintCount - 1, minMintCount, maxMintCount))}
+                      disabled={mintCount === minMintCount}
+                      className="btn-minus"
+                    >
+                      -
+                    </button>
 
-                      <span
-                        className="mint-input__count"
-                      >{mintCount}</span>
+                    <span
+                      className="mint-input__count"
+                    >{mintCount}</span>
 
-                      <button
-                        onClick={() => setMintCount(normalizeMinMax(mintCount + 1), minMintCount, maxMintCount)}
-                        disabled={mintCount + numberMintWallet >= maxMintCount ||
-                          mintCount + totalSupply >= maxTotalSupply}
-                        className="btn-plus"
-                      >
-                        +
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setMintCount(normalizeMinMax(mintCount + 1), minMintCount, maxMintCount)}
+                      disabled={mintCount + numberMintWallet >= maxMintCount ||
+                        mintCount + totalSupply >= maxTotalSupply}
+                      className="btn-plus"
+                    >
+                      +
+                    </button>
+                  </div>
 
-                    <Button
-                      onClick={() => setIsMinted(true)}
-                    >Mint now
-                    </Button>
-                  </>
-                )
-                : (
-                  <a className="btn" href="https://pourkoko.com/">
-                    <span>Back to website</span>
-                  </a>
-                )}
+                  <Button
+                    onClick={(handleMint)}
+                  >Mint now
+                  </Button>
+                </>)
+              }
+              {isMinted &&
+                <a className="btn" href="https://pourkoko.com/">
+                  <span>Back to website</span>
+                </a>
+              }
             </div>
           </div>
           {fallback && <p className="warn-text">{fallback}</p>}
@@ -326,7 +321,7 @@ const MintButton = ({ onMint }) => {
 
       ) : (
         <div className="mint-button__connect-wallet">
-          <h4>{isPresale
+          <h4>{!publicMintActive
             ? 'Connect wallet to mint'
             : <>
               Public sale is live!
