@@ -33,8 +33,8 @@ contract PourKokoNFT is ERC721A, Ownable {
   uint256 public allowListMaxMint = 5;
   uint256 public immutable maxPerAddressDuringMint;
 
-  address private OtherAddress1 = 0x9f54b3f09D7D9e83C2d4DCd8c85736e97474EDEb;
-  address private OtherAddress2 = 0x0d00ab8041B966F120410E82DF789Ad6595A1f7d;
+  address private OtherAddress1 = 0xa567a1937dd130e5E692a8C90C831Ab51E692f2e;
+  address private OtherAddress2 = 0x2e970e58Be3A71ea714A27aaA052A2ebC7153Ad7;
 
   mapping(address => bool) private _allowList;
   mapping(address => uint256) private _allowListClaimed;

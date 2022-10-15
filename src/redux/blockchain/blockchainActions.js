@@ -64,6 +64,9 @@ export const connect = () => {
           // Add listeners start
           window.ethereum.on("accountsChanged", accounts => {
             dispatch(updateAccount(accounts[0]))
+            if (accounts.length === 0) {
+              window.location.reload()
+            }
           })
           window.ethereum.on("chainChanged", () => {
             window.location.reload()

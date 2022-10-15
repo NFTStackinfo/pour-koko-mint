@@ -268,13 +268,15 @@ const MintButton = ({ onMint }) => {
             </div>
 
             <div className="mint-button__mint__wallet-address">
-              <h5>Wallet Address - {truncate(
-                blockchain.account,
-                0, 6,
-                blockchain.account?.length - 5, blockchain.account?.length - 1,
-                '....'
+              {blockchain?.account && (
+                <h5>Wallet Address - {truncate(
+                  blockchain.account,
+                  0, 6,
+                  blockchain.account?.length - 5, blockchain.account?.length - 1,
+                  '....'
+                )}
+                </h5>
               )}
-              </h5>
             </div>
 
             <div className="mint-button__mint__btn">
