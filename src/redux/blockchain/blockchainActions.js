@@ -47,7 +47,7 @@ export const connect = () => {
         })
         // console.log(networkId)
         //const NetworkData = await SmartContract.networks[networkId];
-        console.log('networkId : ', networkId)
+        // console.log('networkId : ', networkId)
         if (networkId === "11155111" || networkId === 11155111) {
           const SmartContractObj = new web3.eth.Contract(
             SmartContract.abi,

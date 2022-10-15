@@ -105,89 +105,91 @@ const MintButton = ({ onMint }) => {
     }
   }
 
-  useEffect(async () => {
-    if (blockchain.account !== '' && blockchain.smartContract !== null) {
+  useEffect(() => {
+    (async () => {
+      if (blockchain.account !== '' && blockchain.smartContract !== null) {
 
-      dispatch(fetchData(blockchain.account))
-      if (blockchain.account) {
-        setWalletConnected(true)
-        const isMintActive = await blockchain.smartContract.methods.isMintActive().call()
-        const isPreSaleMintActive = await blockchain.smartContract.methods.isPreSaleMintActive().call()
+        dispatch(fetchData(blockchain.account))
+        if (blockchain.account) {
+          setWalletConnected(true)
+          const isMintActive = await blockchain.smartContract.methods.isMintActive().call()
+          const isPreSaleMintActive = await blockchain.smartContract.methods.isPreSaleMintActive().call()
 
-        const price = isMintActive
-          ?
-          await blockchain.smartContract.methods.mintPrice().call() / 10 ** 18
-          :
-          await blockchain.smartContract.methods.preSaleMintPrice().call() /
-          10 ** 18
-        setMintPrice(price)
+          const price = isMintActive
+            ?
+            await blockchain.smartContract.methods.mintPrice().call() / 10 ** 18
+            :
+            await blockchain.smartContract.methods.preSaleMintPrice().call() /
+            10 ** 18
+          setMintPrice(price)
 
-        const maximumMintSupply = await blockchain?.smartContract?.methods.maximumMintSupply().call()
-        setMaxTotalSupply(+maximumMintSupply)
+          const maximumMintSupply = await blockchain?.smartContract?.methods.maximumMintSupply().call()
+          setMaxTotalSupply(+maximumMintSupply)
 
-        if (isMintActive) {
-          setNotSelected(false)
-          setPublicMintActive(true)
-          const publicMintMaxMint = await blockchain.smartContract.methods.maximumAllowedTokensPerWallet().call()
-          setMaxMintCount(+publicMintMaxMint)
+          if (isMintActive) {
+            setNotSelected(false)
+            setPublicMintActive(true)
+            const publicMintMaxMint = await blockchain.smartContract.methods.maximumAllowedTokensPerWallet().call()
+            setMaxMintCount(+publicMintMaxMint)
 
-          const publicMintedWallet = await blockchain?.smartContract?.methods.publicMintClaimed(
-            blockchain.account).call()
-          setNumberMintWallet(+publicMintedWallet)
-        } else if (isPreSaleMintActive) {
-          const preSaleMaxMint = await blockchain.smartContract.methods.allowListMaxMint().call()
-          setMaxMintCount(+preSaleMaxMint)
+            const publicMintedWallet = await blockchain?.smartContract?.methods.publicMintClaimed(
+              blockchain.account).call()
+            setNumberMintWallet(+publicMintedWallet)
+          } else if (isPreSaleMintActive) {
+            const preSaleMaxMint = await blockchain.smartContract.methods.allowListMaxMint().call()
+            setMaxMintCount(+preSaleMaxMint)
 
-          const preSaleMintedWallet = await blockchain?.smartContract?.methods.allowListClaimedBy(
-            blockchain.account).call()
-          setNumberMintWallet(+preSaleMintedWallet)
-          if (preSaleMaxMint === preSaleMintedWallet) {
-            setDisableMint(true)
+            const preSaleMintedWallet = await blockchain?.smartContract?.methods.allowListClaimedBy(
+              blockchain.account).call()
+            setNumberMintWallet(+preSaleMintedWallet)
+            if (preSaleMaxMint === preSaleMintedWallet) {
+              setDisableMint(true)
+            }
+
+            const root = await blockchain?.smartContract?.methods.getRoot().call()
+            let tree
+
+            const createMerkleTree = () => {
+              const leaves = addressList.map(v => keccak256(v))
+              tree = new MerkleTree(leaves, keccak256, { sort: true })
+            }
+
+            const getRoot = () => {
+              return tree.getHexRoot()
+            }
+
+
+            createMerkleTree()
+            const localRoot = getRoot()
+
+            const account = await blockchain.account
+
+            //uncomment this for seeing root in console
+            // console.log({root});
+            // console.log({localRoot});
+
+            if (root === localRoot && addressList.includes(account)) {
+              return setNotSelected(false)
+            } else {
+              setNotSelected(true)
+              setFallback('Unfortunately you have not been selected to mint.')
+            }
           }
 
-          const root = await blockchain?.smartContract?.methods.getRoot().call()
-          let tree
 
-          const createMerkleTree = () => {
-            const leaves = addressList.map(v => keccak256(v))
-            tree = new MerkleTree(leaves, keccak256, { sort: true })
+          if (!isMintActive && !isPreSaleMintActive) {
+            return setFallback('The minting is closed')
+          }
+          if (totalSupply > maxTotalSupply) {
+            return setFallback('No more NFTs are left to mint for this stage.')
           }
 
-          const getRoot = () => {
-            return tree.getHexRoot()
-          }
+          const getTotalSupply = await blockchain?.smartContract?.methods.getTotalSupply().call()
+          setTotalSupply(Number(getTotalSupply))
 
-
-          createMerkleTree()
-          const localRoot = getRoot()
-
-          const account = await blockchain.account
-
-          //uncomment this for seeing root in console
-          // console.log({root});
-          // console.log({localRoot});
-
-          if (root === localRoot && addressList.includes(account)) {
-            return setNotSelected(false)
-          } else {
-            setNotSelected(true)
-            setFallback('Unfortunately you have not been selected to mint.')
-          }
         }
-
-
-        if (!isMintActive && !isPreSaleMintActive) {
-          return setFallback('The minting is closed')
-        }
-        if (totalSupply > maxTotalSupply) {
-          return setFallback('No more NFTs are left to mint for this stage.')
-        }
-
-        const getTotalSupply = await blockchain?.smartContract?.methods.getTotalSupply().call()
-        setTotalSupply(Number(getTotalSupply))
-
       }
-    }
+    })()
   }, [
     blockchain.smartContract,
     totalSupply,
@@ -200,8 +202,6 @@ const MintButton = ({ onMint }) => {
     publicMintActive
   ])
 
-  // TODO: change dapp link
-  // blockchain error handling
   useEffect(() => {
     setConnectingMobile(true)
 
@@ -218,7 +218,7 @@ const MintButton = ({ onMint }) => {
   // open mobile metamask
   const openMobileMetamask = () => {
     if (typeof window.ethereum === 'undefined') {
-      if (connectingMobile && !walletConnected && (isIOS || isAndroid)
+      if ((connectingMobile && !walletConnected && (isIOS || isAndroid))
         || blockchain.errorMsg === metamaskError) {
         window.location.replace(
           'https://metamask.app.link/dapp/mellow-mooncake-43c228.netlify.app/')
