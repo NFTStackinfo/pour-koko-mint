@@ -48,10 +48,10 @@ export const connect = () => {
         // console.log(networkId)
         //const NetworkData = await SmartContract.networks[networkId];
         // console.log('networkId : ', networkId)
-        if (networkId === "11155111" || networkId === 11155111) {
+        if (networkId === "1" || networkId === 1) {
           const SmartContractObj = new web3.eth.Contract(
             SmartContract.abi,
-            "0x694828C31a6715c46d3745AbAbAB1bC4d3aA61c2"
+            "0xA61F84AcF07dd2732c06324E865292BDd6615Bc9"
           )
 
           dispatch(
