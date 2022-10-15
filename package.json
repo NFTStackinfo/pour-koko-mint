@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@coinbase/wallet-sdk": "^3.5.3",
     "@openzeppelin/contracts": "^4.5.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -19,7 +20,8 @@
     "react-scripts": "4.0.3",
     "redux-thunk": "^2.4.1",
     "web-vitals": "^1.0.1",
-    "web3": "^1.7.1"
+    "web3": "^1.7.1",
+    "web3modal": "^1.9.9"
   },
   "scripts": {
     "start": "react-scripts start",

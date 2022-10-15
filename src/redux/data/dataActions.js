@@ -23,8 +23,10 @@ const fetchDataFailed = payload => {
 
 export const fetchData = account => {
   return async dispatch => {
+    console.group('fetchData')
     dispatch(fetchDataRequest())
     try {
+      console.log('blockchain: ', store.getState().blockchain)
       let name = await store
         .getState()
         .blockchain.smartContract.methods.name()
@@ -39,5 +41,6 @@ export const fetchData = account => {
       console.log(err)
       dispatch(fetchDataFailed("Could not load data from contract."))
     }
+    console.groupEnd()
   }
 }
